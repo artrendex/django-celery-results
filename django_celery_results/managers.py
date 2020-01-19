@@ -1,7 +1,7 @@
 """Model managers."""
 from __future__ import absolute_import, unicode_literals
 import warnings
-
+from datetime import datetime
 from functools import wraps
 from itertools import count
 
@@ -113,9 +113,10 @@ class TaskResultManager(models.Manager):
                 happen in a race condition if another worker is trying to
                 create the same task.  The default is to retry twice.
         """
+        now_timestamp = now().timestamp()
         fields = {
             'status': status,
-            'status_tracks': [(status, now())],
+            'status_tracks': [(status, now_timestamp)],
             'result': result,
             'traceback': traceback,
             'meta': meta,
@@ -131,7 +132,7 @@ class TaskResultManager(models.Manager):
             fields.pop('status_tracks', None)
             for k, v in items(fields):
                 setattr(obj, k, v)
-            obj.status_tracks.append((status, now()))
+            obj.status_tracks.append((status, now_timestamp))
             obj.save(using=using)
         return obj
 
