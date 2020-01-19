@@ -1,6 +1,5 @@
 """Model managers."""
 from __future__ import absolute_import, unicode_literals
-
 import warnings
 
 from functools import wraps
@@ -116,6 +115,7 @@ class TaskResultManager(models.Manager):
         """
         fields = {
             'status': status,
+            'status_tracks': [(status, now())],
             'result': result,
             'traceback': traceback,
             'meta': meta,
@@ -128,8 +128,10 @@ class TaskResultManager(models.Manager):
         obj, created = self.using(using).get_or_create(task_id=task_id,
                                                        defaults=fields)
         if not created:
+            fields.pop('status_tracks', None)
             for k, v in items(fields):
                 setattr(obj, k, v)
+            obj.status_tracks.append((status, now()))
             obj.save(using=using)
         return obj
 

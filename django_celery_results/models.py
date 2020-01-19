@@ -4,20 +4,18 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+from django_mysql.models import JSONField
 from celery import states
 from celery.five import python_2_unicode_compatible
-
 from . import managers
 
 ALL_STATES = sorted(states.ALL_STATES)
 TASK_STATE_CHOICES = sorted(zip(ALL_STATES, ALL_STATES))
 
-
 @python_2_unicode_compatible
 class TaskResult(models.Model):
     """Task result/status."""
-
+    id = models.BigAutoField(primary_key=True)
     task_id = models.CharField(
         max_length=getattr(
             settings,
@@ -46,6 +44,11 @@ class TaskResult(models.Model):
         choices=TASK_STATE_CHOICES,
         verbose_name=_('Task State'),
         help_text=_('Current state of the task being run'))
+    status_tracks = JSONField(
+        default=list,
+        verbose_name=_('Task State Tracks'),
+        help_text=_('List of statuses and datetime')
+    )
     content_type = models.CharField(
         max_length=128,
         verbose_name=_('Result Content Type'),
@@ -87,6 +90,10 @@ class TaskResult(models.Model):
 
         verbose_name = _('task result')
         verbose_name_plural = _('task results')
+
+    @property
+    def retries(self):
+        return self.status_tracks.count(states.RETRY)
 
     def as_dict(self):
         return {
