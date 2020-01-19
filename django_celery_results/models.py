@@ -12,6 +12,7 @@ from . import managers
 ALL_STATES = sorted(states.ALL_STATES)
 TASK_STATE_CHOICES = sorted(zip(ALL_STATES, ALL_STATES))
 
+
 @python_2_unicode_compatible
 class TaskResult(models.Model):
     """Task result/status."""
@@ -93,7 +94,9 @@ class TaskResult(models.Model):
 
     @property
     def retries(self):
-        return self.status_tracks.count(states.RETRY)
+        if len(self.status_tracks) == 0:
+            return 0
+        return list(zip(*self.status_tracks))[0].count(states.RETRY)
 
     def as_dict(self):
         return {
