@@ -72,6 +72,11 @@ class TaskResult(models.Model):
         auto_now=True, db_index=True,
         verbose_name=_('Completed DateTime'),
         help_text=_('Datetime field when the task was completed in UTC'))
+    date_updated = models.DateTimeField(
+        auto_now=True, db_index=True,
+        verbose_name=_('Updated DateTime'),
+        help_text=_('Datetime field when the task was updated in UTC')
+    )
     traceback = models.TextField(
         blank=True, null=True,
         verbose_name=_('Traceback'),
