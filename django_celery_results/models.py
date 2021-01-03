@@ -100,6 +100,7 @@ class TaskResult(models.Model):
         return {
             'task_id': self.task_id,
             'task_name': self.task_name,
+            'name': self.task_name,
             'task_args': self.task_args,
             'task_kwargs': self.task_kwargs,
             'status': self.status,
