@@ -7,9 +7,8 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from celery import states
 from celery.result import GroupResult, result_from_tuple
-
+from . import states
 from . import managers
 
 ALL_STATES = sorted(states.ALL_STATES)

@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import warnings
+from datetime import timedelta
 
 from functools import wraps
 from itertools import count
@@ -11,7 +12,7 @@ from celery.utils.time import maybe_timedelta
 from django.db import connections, router, transaction
 from django.db import models
 from django.conf import settings
-
+from .states import STARTED
 from .utils import now
 
 W_ISOLATION_REP = """
@@ -169,3 +170,9 @@ class TaskResultManager(models.Manager):
         """Delete all expired results."""
         with transaction.atomic():
             self.get_all_expired(expires).delete()
+
+    def idle_tasks(self, delta=getattr(
+            settings,
+            'DJANGO_CELERY_RESULTS_IDLE_TIMEOUT', 300)):
+        delta = maybe_timedelta(delta)
+        return self.filter(date_updated__lt=now() - delta, status=STARTED)
